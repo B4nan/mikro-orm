@@ -88,6 +88,7 @@ export class Configuration<D extends IDatabaseDriver = IDatabaseDriver> {
     mysql: { className: 'MySqlDriver', module: () => require('@mikro-orm/mysql') },
     mariadb: { className: 'MariaDbDriver', module: () => require('@mikro-orm/mariadb') },
     postgresql: { className: 'PostgreSqlDriver', module: () => require('@mikro-orm/postgresql') },
+    mssql: { className: 'MsSqlDriver', module: () => require('@mikro-orm/mssql') },
     sqlite: { className: 'SqliteDriver', module: () => require('@mikro-orm/sqlite') },
   };
 

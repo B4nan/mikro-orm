@@ -14,8 +14,8 @@ export class MySqlSchemaHelper extends SchemaHelper {
     date: ['datetime(?)', 'timestamp(?)', 'datetime', 'timestamp'],
     string: ['varchar(?)', 'varchar', 'text', 'bigint', 'enum'],
     text: ['text'],
-    object: ['json'],
-    json: ['json'],
+    object: ['text'],
+    json: ['text'],
     enum: ['enum'],
   };
 

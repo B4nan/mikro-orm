@@ -31,7 +31,18 @@ services:
     environment:
       POSTGRES_HOST_AUTH_METHOD: trust
 
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    ports:
+      - 1433:1433
+    volumes:
+      - mssql:/var/opt/mssql/data
+    environment:
+      SA_PASSWORD: Root.Root
+      ACCEPT_EULA: Y
+
 volumes:
   mysql:
   mariadb:
   postgre:
+  mssql:

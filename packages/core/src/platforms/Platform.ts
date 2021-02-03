@@ -31,6 +31,10 @@ export abstract class Platform {
     return false;
   }
 
+  usesOutputStatement(): boolean {
+    return false;
+  }
+
   usesCascadeStatement(): boolean {
     return false;
   }

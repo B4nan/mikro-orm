@@ -468,6 +468,8 @@ export class MetadataDiscovery {
       cascade: [Cascade.ALL],
       fixedOrder: prop.fixedOrder,
       fixedOrderColumn: prop.fixedOrderColumn,
+      onUpdateIntegrity: prop.onUpdateIntegrity,
+      onDelete: prop.onDelete,
     } as EntityProperty;
 
     const meta = this.metadata.get(type);

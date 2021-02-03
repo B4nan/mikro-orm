@@ -10,6 +10,7 @@ import { OptimisticLockError } from '../errors';
 export class ChangeSetPersister {
 
   private readonly platform = this.driver.getPlatform();
+  private readonly usesReturningStatement = this.platform.usesReturningStatement() || this.platform.usesOutputStatement();
 
   constructor(private readonly driver: IDatabaseDriver,
               private readonly metadata: MetadataStorage,
@@ -90,7 +91,7 @@ export class ChangeSetPersister {
       const chunk = changeSets.slice(i, i + size);
       await this.persistNewEntitiesBatch(meta, chunk, ctx);
 
-      if (!this.platform.usesReturningStatement()) {
+      if (!this.usesReturningStatement) {
         await this.reloadVersionValues(meta, chunk, ctx);
       }
     }

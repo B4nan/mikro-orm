@@ -3,6 +3,7 @@ import { EntityManager, JavaScriptMetadataProvider, LoadStrategy, MikroORM, Opti
 import { AbstractSqlDriver, SchemaGenerator, SqlEntityManager, SqlEntityRepository } from '@mikro-orm/knex';
 import { SqliteDriver } from '@mikro-orm/sqlite';
 import { MongoDriver } from '@mikro-orm/mongodb';
+import { MsSqlDriver } from '@mikro-orm/mssql';
 import { MySqlDriver } from '@mikro-orm/mysql';
 import { MariaDbDriver } from '@mikro-orm/mariadb';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
@@ -115,6 +116,45 @@ export async function initORMPostgreSql(loadStrategy = LoadStrategy.SELECT_IN) {
   return orm;
 }
 
+export async function initORMMsSql() {
+  const orm = await MikroORM.init<MsSqlDriver>({
+    entities: ['entities-mssql'],
+    dbName: `mikro_orm_test`,
+    baseDir: BASE_DIR,
+    type: 'mssql',
+    password: 'Root.Root',
+    // debug: ['query'],
+    debug: true,
+    forceUtcTimezone: true,
+    autoJoinOneToOneOwner: false,
+    // logger: i => i,
+  });
+
+  const schemaGenerator = new SchemaGenerator(orm.em);
+  await schemaGenerator.ensureDatabase();
+  await schemaGenerator.dropSchema();
+  console.log(await schemaGenerator.generate());
+  await schemaGenerator.createSchema();
+  // const connection = orm.em.getConnection();
+  // await connection.loadFile(__dirname + '/mssql-schema.sql');
+  const metadata = orm.getMetadata().getAll();
+
+  for (const meta of Object.values(metadata)) {
+    const pks = meta.getPrimaryProps();
+    const autoIncrement = meta.tableName && pks.length === 1 && (pks[0].type === 'number' || orm.em.getPlatform().isBigIntProperty(pks[0]));
+
+    if (autoIncrement) {
+      await orm.em.execute('SET IDENTITY_INSERT ?? ON', [meta.tableName]);
+    }
+  }
+
+  Author2Subscriber.log.length = 0;
+  EverythingSubscriber.log.length = 0;
+  FlushSubscriber.log.length = 0;
+
+  return orm;
+}
+
 export async function initORMSqlite() {
   const orm = await MikroORM.init<SqliteDriver>({
     entities: [Author3, Book3, BookTag3, Publisher3, Test3, BaseEntity4],
@@ -206,6 +246,24 @@ export async function wipeDatabasePostgreSql(em: SqlEntityManager) {
   await em.createQueryBuilder('book_to_tag_unordered').truncate().execute();
   await em.createQueryBuilder('publisher2_tests').truncate().execute();
   await em.getConnection().execute(`set session_replication_role = 'origin'`);
+  em.clear();
+  Author2Subscriber.log.length = 0;
+  EverythingSubscriber.log.length = 0;
+  FlushSubscriber.log.length = 0;
+}
+
+export async function wipeDatabaseMsSql(em: SqlEntityManager) {
+  await em.createQueryBuilder(Author2).truncate().execute();
+  await em.createQueryBuilder(Book2).truncate().execute();
+  await em.createQueryBuilder(BookTag2).truncate().execute();
+  await em.createQueryBuilder(Publisher2).truncate().execute();
+  await em.createQueryBuilder(Test2).truncate().execute();
+  await em.createQueryBuilder(FooBar2).truncate().execute();
+  await em.createQueryBuilder(FooBaz2).truncate().execute();
+  await em.createQueryBuilder(FooParam2).truncate().execute();
+  await em.createQueryBuilder('book2_tags').truncate().execute();
+  await em.createQueryBuilder('book_to_tag_unordered').truncate().execute();
+  await em.createQueryBuilder('publisher2_tests').truncate().execute();
   em.clear();
   Author2Subscriber.log.length = 0;
   EverythingSubscriber.log.length = 0;

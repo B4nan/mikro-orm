@@ -161,7 +161,7 @@ export abstract class AbstractSqlConnection extends Connection {
       return formatted;
     }
 
-    return this.client.client.positionBindings(query);
+    return query;
   }
 
   /**
@@ -179,6 +179,7 @@ export abstract class AbstractSqlConnection extends Connection {
       }
 
       if ((obj.bindings ?? []).length > 0) {
+        console.log('wut', obj.sql);
         return query.call(this, connection, obj);
       }
 
