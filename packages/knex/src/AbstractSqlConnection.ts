@@ -26,6 +26,10 @@ export abstract class AbstractSqlConnection extends Connection {
     return this.client;
   }
 
+  getSchema(): string {
+    return this.config.get('schema');
+  }
+
   async close(force?: boolean): Promise<void> {
     await this.client.destroy();
   }
@@ -101,6 +105,7 @@ export abstract class AbstractSqlConnection extends Connection {
   async execute<T extends QueryResult | EntityData<AnyEntity> | EntityData<AnyEntity>[] = EntityData<AnyEntity>[]>(queryOrKnex: string | QueryBuilder | Raw, params: any[] = [], method: 'all' | 'get' | 'run' = 'all', ctx?: Transaction): Promise<T> {
     if (Utils.isObject<QueryBuilder | Raw>(queryOrKnex)) {
       ctx = ctx ?? ((queryOrKnex as any).client.transacting ? queryOrKnex : null);
+      (queryOrKnex as QueryBuilder).withSchema?.(this.config.get('schema'));
       const q = queryOrKnex.toSQL();
       queryOrKnex = q.sql;
       params = q.bindings as any[];

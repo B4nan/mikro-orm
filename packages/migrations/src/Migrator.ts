@@ -50,6 +50,7 @@ export class Migrator {
       return { fileName: '', code: '', diff };
     }
 
+
     const migration = await this.generator.generate(diff, path);
 
     return {

@@ -8,6 +8,8 @@ import { PostgreSqlDriver, PostgreSqlConnection } from '@mikro-orm/postgresql';
 import { Address2, Author2, Book2, BookTag2, FooBar2, FooBaz2, Publisher2, PublisherType, PublisherType2, Test2, Label2 } from './entities-sql';
 import { initORMPostgreSql, wipeDatabasePostgreSql } from './bootstrap';
 import { performance } from 'perf_hooks';
+import * as fs from 'fs';
+import fspath from 'path';
 
 describe('EntityManagerPostgre', () => {
 
@@ -1705,5 +1707,69 @@ describe('EntityManagerPostgre', () => {
   });
 
   afterAll(async () => orm.close(true));
+
+});
+
+
+describe('EntityManagerPostgre multiple schemas', () => {
+  let orm1: MikroORM<PostgreSqlDriver>, orm2: MikroORM<PostgreSqlDriver>;
+  beforeAll(async () => {
+    orm1 = await initORMPostgreSql(undefined, 'test_1', true);
+    orm2 = await initORMPostgreSql(undefined, 'test_2', true);
+  });
+
+  afterAll(async () => {
+    await orm1.em.getConnection().execute(`drop schema ${orm1.em.getConnection().getSchema()} cascade`);
+    await orm2.em.getConnection().execute(`drop schema ${orm2.em.getConnection().getSchema()} cascade`);
+    await orm1.close(true);
+    await orm2.close(true);
+  });
+
+  it('migrate correctly', async () => {
+    fs.mkdirSync('tests/migrations', { recursive: true });
+    const migrator1 = orm1.getMigrator();
+    const m1 = await migrator1.createMigration();
+    await migrator1.up();
+    const dir = orm1.config.get('migrations').path;
+    fs.unlinkSync(fspath.join(dir!, m1.fileName));
+
+    const migrator2 = orm2.getMigrator();
+    const m2 = await migrator2.createMigration();
+    await migrator2.up();
+    expect(m2.fileName).toBeTruthy();
+    fs.unlinkSync(fspath.join(dir!, m2.fileName));
+
+    const d = await orm1.connect();
+    const res = await d.execute('select nspname from pg_catalog.pg_namespace;');
+    expect(res.map(x => x.nspname)).toContain('test_1');
+    expect(res.map(x => x.nspname)).toContain('test_2');
+  });
+
+  it('access correct schema', async () => {
+    const author1 = orm1.em.create(Author2, {
+      email: 'author@mikro',
+      name: 'mikro',
+      address: 'none',
+    });
+    const author2 = orm2.em.create(Author2, {
+      email: 'author@mikro',
+      name: 'mikro',
+      address: 'none',
+    });
+    orm1.em.persist(author1);
+    orm2.em.persist(author2);
+    // flush in parallel
+    const p1 = orm1.em.flush();
+    const p2 = orm2.em.flush();
+    await Promise.all([p1, p2]);
+
+    const authors1 = await orm1.em.find(Author2, {});
+    expect(authors1.length).toEqual(1);
+    expect(authors1.length).toEqual(1);
+
+    const authors2 = await orm2.em.find(Author2, {});
+    expect(authors2.length).toEqual(1);
+    expect(authors2.length).toEqual(1);
+  });
 
 });
