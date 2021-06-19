@@ -2,7 +2,7 @@
 
 exports[`Migrator - with explicit migrations runner: migrator-migrations-list 1`] = `
 Array [
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -417,6 +417,39 @@ export class Migration20191013214813 extends Migration {
 }
 `;
 
+exports[`Migrator generate schema migration with explicit names: migration-dump 1`] = `
+Object {
+  "code": "import { Migration } from '@mikro-orm/migrations';
+
+export class Migration20191013214813 extends Migration {
+
+  async up(): Promise<void> {
+    this.addSql('alter table \`mikro_orm_test\`.\`test2\` drop foreign key \`test2_foo___bar_foreign\`;');
+
+    this.addSql('alter table \`mikro_orm_test\`.\`book2\` drop \`foo\`;');
+
+    this.addSql('alter table \`mikro_orm_test\`.\`test2\` drop index \`test2_foo___bar_unique\`;');
+    this.addSql('alter table \`mikro_orm_test\`.\`test2\` drop index \`test2_foo___bar_index\`;');
+    this.addSql('alter table \`mikro_orm_test\`.\`test2\` drop \`foo___bar\`;');
+    this.addSql('alter table \`mikro_orm_test\`.\`test2\` drop \`foo___baz\`;');
+  }
+
+}
+",
+  "diff": Array [
+    "alter table \`mikro_orm_test\`.\`test2\` drop foreign key \`test2_foo___bar_foreign\`;",
+    "",
+    "alter table \`mikro_orm_test\`.\`book2\` drop \`foo\`;",
+    "",
+    "alter table \`mikro_orm_test\`.\`test2\` drop index \`test2_foo___bar_unique\`;",
+    "alter table \`mikro_orm_test\`.\`test2\` drop index \`test2_foo___bar_index\`;",
+    "alter table \`mikro_orm_test\`.\`test2\` drop \`foo___bar\`;",
+    "alter table \`mikro_orm_test\`.\`test2\` drop \`foo___baz\`;",
+  ],
+  "fileName": "Migration20191013214813.ts",
+}
+`;
+
 exports[`Migrator generate schema migration: migration-dump 1`] = `
 Object {
   "code": "import { Migration } from '@mikro-orm/migrations';
@@ -783,7 +816,7 @@ export class Migration20191013214813 extends Migration {
 
 exports[`Migrator up/down params [all or nothing disabled]: all-or-nothing-disabled 1`] = `
 Array [
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "create table \`mikro_orm_migrations\` (\`id\` int unsigned not null auto_increment primary key, \`name\` varchar(255), \`executed_at\` datetime default current_timestamp) (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -791,25 +824,25 @@ Array [
   "select 1 (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select 1 (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -817,9 +850,9 @@ Array [
   "select 1 (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -831,7 +864,7 @@ Array [
 
 exports[`Migrator up/down params [all or nothing enabled]: all-or-nothing 1`] = `
 Array [
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "create table \`mikro_orm_migrations\` (\`id\` int unsigned not null auto_increment primary key, \`name\` varchar(255), \`executed_at\` datetime default current_timestamp) (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -841,7 +874,7 @@ Array [
   "release savepointtrx\\\\d+ (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -849,7 +882,7 @@ Array [
   "release savepointtrx\\\\d+ (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "savepointtrx\\\\d+ (via write connection '127.0.0.1')",
@@ -857,7 +890,7 @@ Array [
   "release savepointtrx\\\\d+ (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -865,7 +898,7 @@ Array [
   "release savepointtrx\\\\d+ (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -875,11 +908,11 @@ Array [
   "release savepointtrx\\\\d+ (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "begin (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -894,7 +927,7 @@ Array [
 exports[`Migrator up/down with explicit transaction: explicit-tx 1`] = `
 Array [
   "begin (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "create table \`mikro_orm_migrations\` (\`id\` int unsigned not null auto_increment primary key, \`name\` varchar(255), \`executed_at\` datetime default current_timestamp) (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
@@ -907,21 +940,21 @@ Array [
   "select 1 (via write connection '127.0.0.1')",
   "release savepointtrx_xx (via write connection '127.0.0.1')",
   "insert into \`mikro_orm_migrations\` (\`name\`) values (?) (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "savepointtrx_xx (via write connection '127.0.0.1')",
   "release savepointtrx_xx (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "savepointtrx_xx (via write connection '127.0.0.1')",
   "release savepointtrx_xx (via write connection '127.0.0.1')",
   "delete from \`mikro_orm_migrations\` where \`name\` = ? (via write connection '127.0.0.1')",
-  "select table_name as table_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
+  "select table_name as table_name, table_schema as schema_name, table_comment as table_comment from information_schema.tables where table_type = 'BASE TABLE' and table_schema = schema() (via write connection '127.0.0.1')",
   "select * from \`mikro_orm_migrations\` order by \`id\` asc (via write connection '127.0.0.1')",
   "commit (via write connection '127.0.0.1')",
 ]

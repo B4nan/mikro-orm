@@ -47,7 +47,7 @@ export abstract class SchemaHelper {
     return {};
   }
 
-  getListTablesSQL(): string {
+  getListTablesSQL(schemaName?: string): string {
     throw new Error('Not supported by given driver');
   }
 
@@ -198,6 +198,14 @@ export abstract class SchemaHelper {
 
   getDropDatabaseSQL(name: string): string {
     return `drop database if exists ${name}`;
+  }
+
+  getCreateSchemaSQL(name: string): string {
+    return `create schema ${name}`;
+  }
+
+  getDropSchemaSQL(name: string): string {
+    return `drop schema if exists ${name} cascade`;
   }
 
   getDatabaseExistsSQL(name: string): string {

@@ -35,13 +35,38 @@ export class SchemaGenerator {
 
   async ensureDatabase() {
     const dbName = this.config.get('dbName')!;
-    const exists = await this.helper.databaseExists(this.connection, dbName);
 
+    const exists = await this.helper.databaseExists(this.connection, dbName);
     if (!exists) {
       this.config.set('dbName', this.helper.getManagementDbName());
       await this.driver.reconnect();
+
       await this.createDatabase(dbName);
     }
+
+    // do this first so the right database ends up in the config
+    for (const extraSchema of this.getExtraSchemas()) {
+      const exists = await this.helper.databaseExists(this.connection, extraSchema);
+
+      if (!exists) {
+        this.config.set('dbName', this.helper.getManagementDbName());
+        await this.driver.reconnect();
+        await this.createDatabase(extraSchema);
+      }
+    }
+
+    // reset back to the original schema name
+    this.config.set('dbName', dbName);
+  }
+
+  private getExtraSchemas() {
+    const extraSchemas: string[] = [];
+    for (const meta of this.getOrderedMetadata()) {
+      if (meta.schema && !extraSchemas.includes(meta.schema)) {
+        extraSchemas.push(meta.schema);
+      }
+    }
+    return extraSchemas;
   }
 
   getTargetSchema(): DatabaseSchema {
@@ -54,8 +79,10 @@ export class SchemaGenerator {
     const toSchema = this.getTargetSchema();
     let ret = '';
 
-    for (const namespace of toSchema.getNamespaces()) {
-      ret += await this.dump(this.knex.schema.createSchemaIfNotExists(namespace));
+    if (this.platform.supportsSchemas()) {
+      for (const namespace of toSchema.getNamespaces()) {
+        ret += await this.dump(this.knex.schema.createSchemaIfNotExists(namespace));
+      }
     }
 
     for (const tableDef of toSchema.getTables()) {
@@ -87,11 +114,11 @@ export class SchemaGenerator {
     let ret = '';
 
     for (const meta of metadata) {
-      ret += await this.dump(this.dropTable(meta.collection), '\n');
+      ret += await this.dump(this.dropTable(meta.collection, meta.schema), '\n');
     }
 
     if (options.dropMigrationsTable) {
-      ret += await this.dump(this.dropTable(this.config.get('migrations').tableName!), '\n');
+      ret += await this.dump(this.dropTable(this.config.get('migrations').tableName!, this.config.get('explicitSchemaName') ? this.config.get('dbName') : undefined), '\n');
     }
 
     return this.wrapSchema(ret + '\n', { wrap });
@@ -109,7 +136,12 @@ export class SchemaGenerator {
     const toSchema = this.getTargetSchema();
     const fromSchema = options.fromSchema ?? await DatabaseSchema.create(this.connection, this.platform, this.config);
     const comparator = new SchemaComparator(this.platform);
-    const schemaDiff = comparator.compare(fromSchema, toSchema);
+
+    // If explicit schema names is set, then there is no default namespace, and every change will have an explicit
+    // database/schema name.
+    const defaultNamespace = this.config.get('explicitSchemaName') ? undefined : toSchema.name || fromSchema.name;
+    const schemaDiff = comparator.compare(fromSchema, toSchema, defaultNamespace);
+
     let ret = '';
 
     if (this.platform.supportsSchemas()) {
@@ -129,12 +161,12 @@ export class SchemaGenerator {
     }
 
     for (const newTable of Object.values(schemaDiff.newTables)) {
-      ret += await this.dump(this.knex.schema.alterTable(newTable.getShortestName(), table => this.createForeignKeys(table, newTable)));
+      ret += await this.dump(this.knex.schema.alterTable(newTable.getShortestName(defaultNamespace), table => this.createForeignKeys(table, newTable)));
     }
 
     if (options.dropTables && !options.safe) {
       for (const table of Object.values(schemaDiff.removedTables)) {
-        ret += await this.dump(this.dropTable(table.name, table.schema));
+        ret += await this.dump(this.dropTable(table.name, defaultNamespace === table.schema ? undefined : table.schema));
       }
     }
 
@@ -150,7 +182,7 @@ export class SchemaGenerator {
       }
     }
 
-    if (options.dropTables && !options.safe) {
+    if (options.dropTables && !options.safe && this.platform.supportsSchemas()) {
       for (const removedNamespace of schemaDiff.removedNamespaces) {
         ret += await this.dump(this.knex.schema.dropSchema(removedNamespace));
       }
@@ -296,7 +328,37 @@ export class SchemaGenerator {
   async dropDatabase(name: string): Promise<void> {
     this.config.set('dbName', this.helper.getManagementDbName());
     await this.driver.reconnect();
+
+    await this.driver.execute(this.helper.disableForeignKeysSQL());
     await this.driver.execute(this.helper.getDropDatabaseSQL('' + this.knex.ref(name)));
+    await this.driver.execute(this.helper.enableForeignKeysSQL());
+  }
+
+  async dropAllSchemas(): Promise<void> {
+    // if the database supports schemas, only the top level db is relevant.
+    if (!this.platform.supportsSchemas()) {
+      await this.dropDatabases();
+    } else {
+      await this.dropSchemas();
+    }
+    return;
+  }
+
+  private async dropDatabases() {
+    await this.dropDatabase(this.config.get('dbName'));
+    for (const extraSchema of this.getExtraSchemas()) {
+      await this.dropDatabase(extraSchema);
+    }
+  }
+
+  private async dropSchemas() {
+    if (this.config.get('schema')) {
+      this.execute(this.helper.getDropSchemaSQL(this.config.get('schema')));
+    }
+
+    for (const extraSchema of this.getExtraSchemas()) {
+      await this.execute(this.helper.getDropSchemaSQL(extraSchema));
+    }
   }
 
   async execute(sql: string, options: { wrap?: boolean } = {}) {

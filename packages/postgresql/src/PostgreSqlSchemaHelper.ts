@@ -22,13 +22,13 @@ export class PostgreSqlSchemaHelper extends SchemaHelper {
     return `${this.enableForeignKeysSQL()}\n`;
   }
 
-  getListTablesSQL(): string {
+  getListTablesSQL(schemaName?: string) {
     return `select table_name, nullif(table_schema, 'public') as schema_name, `
       + `(select pg_catalog.obj_description(c.oid) from pg_catalog.pg_class c
           where c.oid = (select ('"' || table_schema || '"."' || table_name || '"')::regclass::oid) and c.relname = table_name) as table_comment `
       + `from information_schema.tables `
       + `where table_schema not like 'pg_%' and table_schema != 'information_schema' `
-      + `and table_name != 'geometry_columns' and table_name != 'spatial_ref_sys' and table_type != 'VIEW' order by table_name`;
+      + `and table_name != 'geometry_columns' and table_name != 'spatial_ref_sys' and table_type != 'VIEW' ${schemaName ? `AND table_schema = '${schemaName}'` : ``} order by table_name`;
   }
 
   async getColumns(connection: AbstractSqlConnection, tableName: string, schemaName = 'public'): Promise<Column[]> {

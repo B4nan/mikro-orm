@@ -23,6 +23,10 @@ export class MongoPlatform extends Platform {
     return data as T;
   }
 
+  supportsMultiSchema(): boolean {
+    return false;
+  }
+
   denormalizePrimaryKey(data: number | string): IPrimaryKey {
     return new ObjectId(data);
   }

@@ -25,6 +25,10 @@ export abstract class Platform {
     return true;
   }
 
+  supportsMultiSchema(): boolean {
+    return false;
+  }
+
   usesImplicitTransactions(): boolean {
     return true;
   }
